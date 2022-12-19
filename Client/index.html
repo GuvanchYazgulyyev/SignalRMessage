@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="signalr.min.js"></script>
+    <script src="jquery.min.js"></script>
+    <title>SignalR</title>
+
+    <!--     Sunucu Yolunu Belirtiyoruz-->
+    <script>
+      $(document).ready(() => {
+        const connection = new signalR.HubConnectionBuilder()
+          //.withUrl("https://localhost:5001/myhub")
+          .withUrl("https://localhost:5001/messagehub")
+          // Baglantı Saglandı Faka Aniden Baglantı Koptugundan Tekrardan Otomatik Baglanmaya Çalışır!
+          // build Fonk tan önce  Yazılır. // 0 - 10 - 30
+          //.withAutomaticReconnect()
+          // .withAutomaticReconnect([1000, 2000, 5000, 7000, 10000]) //1-2-5-7-10 Saniye Arasında Denem
+          .withAutomaticReconnect([1000, 2000, 3000]) //1-2-5-7-10 Saniye Arasında Denem
+          .build();
+        // Hiç Baglantı Kurulmadıgı Durumlarda Bu Fonksiyon Kullanılır!
+        async function start() {
+          try {
+            await connection.start();
+          } catch (error) {
+            setTimeout(() => start(), 2000);
+          }
+        }
+
+        // Baglantıyı Aç
+        // connection.start();
+        start();
+        // Animasyon
+        function animation() {
+          durum.fadeIn(2000, () => {
+            setTimeout(() => {
+              durum.fadeOut(2000);
+            }, 2000);
+          });
+        }
+
+        const durum = $("#durum");
+        // Yeniden Baglantı Talebi Yapılmadan Önce Devreye Gir!!
+        connection.onreconnecting((error) => {
+          durum.css("background-color", "green");
+          durum.css("color", "white");
+          durum.html("Bağlantı Kuruluyor....");
+          animation();
+        });
+
+        connection.onreconnected((connectionId) => {
+          durum.css("background-color", "blue");
+          durum.css("color", "white");
+          durum.html("Bağlantı Kuruldu....");
+          animation();
+        });
+
+        connection.onclose((connectionId) => {
+          durum.css("background-color", "red");
+          durum.css("color", "white");
+          durum.html("Bağlantı Kurulamadı....");
+          animation();
+        });
+
+        connection.on("userJoined", (connectionId) => {
+          durum.html(`${connectionId} Baglandı.....`);
+          durum.css("background-color", "green");
+          animation();
+        });
+        connection.on("userLeaved", (connectionId) => {
+          durum.html(`${connectionId} Ayrıldı....`);
+          durum.css("background-color", "red");
+          animation();
+        });
+        connection.on("clients", (clientData) => {
+          let text = "";
+          $.each(clientData, (index, item) => {
+            text += `<li>${item}</li>`;
+          });
+          $("#clients").html(text);
+        });
+
+        // Backend Tarafından Yazılın Methodu çagır
+        $("#btnGonder").click(() => {
+          let message = $("#txtMessage").val();
+          let connectionIds = $("#connectionIds").val().split(",");
+          let groups = $("#txtGroups").val().split(",");
+
+          //connection.invoke("SendMessageAsync", message, connectionIds).catch((error) =>console.log(`Mesaj Gönderilirken Hata Oluştu !!! ${error}`));
+          // connection.invoke("SendMessageAsync",message,$("input[name=group]:checked").val(), connectionIds ).catch((error) =>console.log(`Mesaj Gönderilirken Hata Oluştu !!! ${error}`));
+          connection
+            .invoke("SendMessageAsync", message, groups[0])
+            .catch((error) =>
+              console.log(`Mesaj Gönderilirken Hata Oluştu !!! ${error}`)
+            );
+        });
+
+        // Hub (Method) den gelem Mesajları dinler
+        /*   connection.on("receiverMessage", (message) => {
+          $("mesajlar").append(message + "<br>");
+        }); */
+        // Hub (Method) den gelem Mesajları dinler
+        connection.on("receiveMessage", (message) => {
+          $("mesajlar").append(message + "<br>");
+        });
+
+        //
+        let _connectionId = "";
+        connection.on("getConnectionId", (connectionId) => {
+          _connectionId = connectionId;
+          $("#connectionId").html(`connection Id:${connectionId}`);
+        });
+
+        $("#btnGrubaGir").click(() => {
+          let groupName = $("input[name=group]:checked").val();
+          connection
+            .invoke("addGroup", _connectionId, groupName)
+            .catch((error) =>
+              console.log(`Mesaj Gönderilirken Hata Oluştu !!! ${error}`)
+            );
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div style="background-color: aqua; color: black" id="connectionId"></div>
+    <input type="radio" name="group" value="A" />A
+    <br />
+    <input type="radio" name="group" value="B" />B
+    <br />
+    <input type="radio" name="group" value="C" />C
+    <br />
+
+    <input type="radio" name="group" value="D" />D
+    <br />
+
+    <button id="btnGrubaGir">Gruba Gir</button>
+    <br />
+    <div id="durum" style="display: none"></div>
+    <textarea
+      id="connectionIds"
+      placeholder="ConnectionId"
+      cols="30"
+      rows="10"
+    ></textarea>
+    <br />
+    <br />
+    <input type="text" placeholder="Mesaj" id="txtMessage" /><br />
+    <input type="text" placeholder="Groups" id="txtGroups" /><br />
+    <button id="btnGonder">Gönder</button>
+    <div id="mesajlar"></div>
+    <!--     <div>
+      <ul id="clients"></ul>
+    </div> -->
+  </body>
+</html>
