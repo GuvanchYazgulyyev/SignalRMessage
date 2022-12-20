@@ -1,15 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="signalr.min.js"></script>
-    <script src="jquery.min.js"></script>
-    <title>SignalR</title>
 
-    <!--Sunucu Yolunu Belirtiyoruz-->
-    <script></script>
-  </head>
-  <body></body>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="scripts/signalr.min.js"></script>
+  <script src="scripts/jquery.min.js"></script>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+    crossorigin="anonymous"></script>
+  <title>SignalR Message Guvanch Yazgulyyev</title>
+
+  <!--Sunucu Yolunu Belirtiyoruz-->
+  <script>
+    $(document).ready(() => {
+      $(".disabled").attr("disabled", "disabled");
+
+      $(".users").click(function () {
+        $(".users").each((index, item) => {
+          item.classList.remove("active");
+        });
+        $(this).addClass("active");
+      })
+
+      $("#btnGönder").click(() => {
+        var x = $(".message").clone();
+        x.removeClass("message");
+        x.find("h5")[1].innerHTML = ""// Karşıdaki Kişiyi Gösterir
+        x.find("h5")[0].innerHTML = ""// Beni Gösterir
+        $(".message").append(x);
+      })
+    });
+
+  </script>
+</head>
+
+<body>
+  <div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+      <div class="col-md-1" style="margin-bottom: 10px;"></div>
+      <div class="row">
+        <!--Sol Menü-->
+        <div class="col-md-3">
+          <!-- Oda -->
+          <input type="text" class="form-control form-control-lg disabled" placeholder="Oda Adı...">
+          <br>
+          <button type="button" class="btn btn-info rightButton disabled">Oda Oluştur</button>
+          <br><br>
+          <select name="" id="" size="5" style="width:100%" class="form-select disable" multiple>
+            <option selected value="-1">Odalar</option>
+          </select>
+          <br>
+          <button type="button" class="btn btn-info rightButton disabled">Seçili Odalara Gir</button>
+          <!--Oda-->
+          <br>
+          <br>
+          <!--Clientlar-->
+          <div class="list-group">
+            <a class="list-group-item list-group-item-action users active">Tümü</a>
+            <a class="list-group-item list-group-item-action users" aria-current="true">Tümü deneme 123 Silinecek</a>
+          </div>
+          <!--Clientlar-->
+        </div>
+        <div class="col-md-6">
+
+          <div class="list-group">
+            <a class="list-group-item list-group-item-action" aria-current="true">
+              <div class="d-flex w-100 justify-content-between">
+                <h4 class="mb-1">Mekan</h4>
+                <h5 class="mb-2">Ben</h4>
+              </div>
+              <p class="mb-1">Bura Silinebilir</p>
+              <small>Dominic Dopes Losses</small>
+            </a>
+          </div>
+          <br>
+          <br>
+          <br>
+          <!--Mesajlaşma Kısmı-->
+          <textarea name="" id="" class="form-control" placeholder="İletilecek Mesajı Buraya Giriniz!" cols="20"
+            rows="5"></textarea>
+          <br>
+          <button type="button" class="btn btn-light rightButton" id="btnGonder">Gönder</button>
+
+          <!--Mesajlaşma-->
+        </div>
+        <div class="col-md-3">
+          <input type="text" class="form-control form-control-lg" placeholder="Adınız/NickName">
+          <br>
+          <button type="button" class="btn btn-success leftButton">Giriş Yap</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
 </html>
