@@ -8,34 +8,52 @@
   <script src="scripts/signalr.min.js"></script>
   <script src="scripts/jquery.min.js"></script>
   <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
-    crossorigin="anonymous"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  </link>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
   <title>SignalR Message Guvanch Yazgulyyev</title>
 
   <!--Sunucu Yolunu Belirtiyoruz-->
   <script>
     $(document).ready(() => {
-      $(".disabled").attr("disabled", "disabled");
+      const connection = new signalR.HubConnectionBuilder()
+        .withUrl("https://localhost:5001/chathub")
+        .build();
+      connection.start();
 
+      $(".disabled").attr("disabled", "disabled");
       $(".users").click(function () {
         $(".users").each((index, item) => {
           item.classList.remove("active");
         });
         $(this).addClass("active");
-      })
+      });
+      
+      $("#btnGirisYap").click(() => {
+        const nickName = $("#txtNickName").val();
+        // BackEnd deki Method İsmi (GetNickName)
+        connection.invoke("GetNickName", nickName).catch(error => console.log(error));
+      });
+      /* $("#btnGönder").click(() => {
+              var x = $(".message").clone();
+              x.removeClass("message");
+              x.find("h5")[1].innerHTML = ""// Karşıdaki Kişiyi Gösterir
+              x.find("h5")[0].innerHTML = ""// Beni Gösterir
+              $(".message").append(x);
+            });
+          });*/
 
-      $("#btnGönder").click(() => {
-        var x = $(".message").clone();
-        x.removeClass("message");
-        x.find("h5")[1].innerHTML = ""// Karşıdaki Kişiyi Gösterir
-        x.find("h5")[0].innerHTML = ""// Beni Gösterir
-        $(".message").append(x);
+      // Backend Method İsmi (clientJoined)
+      // Giriş Yaptıgındaki Bildirim Kısmı
+      connection.on("clientJoined", nickName => {
+        $("#clientDurumMesajlari").html(`${nickName} Giriş Yaptı!`);
+        $("#clientDurumMesajlari").fadeIn(2000, () => {
+          setTimeout(() => {
+            $("#clientDurumMesajlari").fadeOut(2000);
+          }, 2000)
+        });
       })
-    });
-
+    })
   </script>
 </head>
 
@@ -68,7 +86,10 @@
           <!--Clientlar-->
         </div>
         <div class="col-md-6">
+          <!--Bildirim-->
+          <div class="alert alert-success" id="clientDurumMesajlari" style="display:none;">
 
+          </div>
           <div class="list-group">
             <a class="list-group-item list-group-item-action" aria-current="true">
               <div class="d-flex w-100 justify-content-between">
@@ -91,9 +112,9 @@
           <!--Mesajlaşma-->
         </div>
         <div class="col-md-3">
-          <input type="text" class="form-control form-control-lg" placeholder="Adınız/NickName">
+          <input type="text" class="form-control form-control-lg" placeholder="Adınız/NickName" id="txtNickName">
           <br>
-          <button type="button" class="btn btn-success leftButton">Giriş Yap</button>
+          <button type="button" class="btn btn-success leftButton" id="btnGirisYap">Giriş Yap</button>
         </div>
       </div>
     </div>

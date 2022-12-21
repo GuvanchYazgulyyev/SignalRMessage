@@ -9,7 +9,7 @@ namespace SignalRMessage.Hubs
 {
     public class ChatHub : Hub
     {
-        public async Task GetNockName(string nickName)
+        public async Task GetNickName(string nickName)
         {
             Client client = new Client
             {
