@@ -22,7 +22,7 @@
       connection.start();
 
       $(".disabled").attr("disabled", "disabled");
-      $(".users").click(function () {
+      $("body").on("click",".users", function () {
         $(".users").each((index, item) => {
           item.classList.remove("active");
         });
@@ -33,6 +33,8 @@
         const nickName = $("#txtNickName").val();
         // BackEnd deki Method İsmi (GetNickName)
         connection.invoke("GetNickName", nickName).catch(error => console.log(error));
+        //  Eğer Client Sisteme Girdiyse Disable Özelliginbi Kaldır
+        $(".disabled").removeAttr("disabled");
       });
       /* $("#btnGönder").click(() => {
               var x = $(".message").clone();
@@ -50,9 +52,36 @@
         $("#clientDurumMesajlari").fadeIn(2000, () => {
           setTimeout(() => {
             $("#clientDurumMesajlari").fadeOut(2000);
-          }, 2000)
+          }, 2000);
         });
-      })
+      });
+      // Tüm Kullanıcılar Listele
+      // Döngü içerisinde
+      connection.on ("clients", clients=>{
+        $("#_clients").html("");
+     $.each(clients, (index,item)=>{
+      const user=$(".users").first().clone();
+        user.removeClass("active");
+        user.html(item.nickName);
+        $("#_clients").append(user);
+     })
+      });
+
+      // Mesajlaşma 
+// Tetiklenen Degerler
+connection.on("receiverMessage",message=>{
+const _message=$(".mesaj").clone();
+_message.find("p").html(message);
+$("messages").append(_message);
+})
+      // Gönderilecek Degerler
+      $("btnGonder").click(()=>{
+// Aktif Olan Users i yakala
+const clientName =$(".users.active").first().html();
+// TextArea daki  değeri yakala 
+const message=$("#txtMesaj").val();
+connection.invoke("SendMessageAsync",message,clientName);
+      });
     })
   </script>
 </head>
@@ -79,10 +108,11 @@
           <br>
           <br>
           <!--Clientlar-->
-          <div class="list-group">
+          <div class="list-group clients">
             <a class="list-group-item list-group-item-action users active">Tümü</a>
-            <a class="list-group-item list-group-item-action users" aria-current="true">Tümü deneme 123 Silinecek</a>
+            <div id="_clients"></div>
           </div>
+        
           <!--Clientlar-->
         </div>
         <div class="col-md-6">
@@ -90,24 +120,23 @@
           <div class="alert alert-success" id="clientDurumMesajlari" style="display:none;">
 
           </div>
-          <div class="list-group">
-            <a class="list-group-item list-group-item-action" aria-current="true">
-              <div class="d-flex w-100 justify-content-between">
-                <h4 class="mb-1">Mekan</h4>
-                <h5 class="mb-2">Ben</h4>
-              </div>
-              <p class="mb-1">Bura Silinebilir</p>
-              <small>Dominic Dopes Losses</small>
-            </a>
-          </div>
-          <br>
-          <br>
-          <br>
           <!--Mesajlaşma Kısmı-->
-          <textarea name="" id="" class="form-control" placeholder="İletilecek Mesajı Buraya Giriniz!" cols="20"
+          <textarea name="" id="txtMesaj" class="form-control" placeholder="İletilecek Mesajı Buraya Giriniz!" cols="20"
             rows="5"></textarea>
+            <br>
+            <button type="button" class="btn btn-light rightButton" id="btnGonder">Gönder</button>
           <br>
-          <button type="button" class="btn btn-light rightButton" id="btnGonder">Gönder</button>
+          <br>
+          <div class="list-group messages">
+            <a class="list-group-item list-group-item-action mesaj" aria-current="true">
+              <div class="d-flex w-100 justify-content-between">
+                <h4 class="mb-1"></h4>
+                <h5 class="mb-2">Sen</h4>
+              </div>
+              <p class="mb-1"></p>
+<!--  <small>Dominic Dopes Losses</small>-->           
+ </a>
+          </div>
 
           <!--Mesajlaşma-->
         </div>
